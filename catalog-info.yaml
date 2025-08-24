@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: testmigrating
+  description: Not AI generated testmigrating
+  annotations:
+    github.com/project-slug: KeertiPusarlaa/testmigrating
+spec:
+  type: service
+  owner: default
+  lifecycle: production
