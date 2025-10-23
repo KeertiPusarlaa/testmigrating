@@ -3,12 +3,20 @@ package com.javatechie.jwt.api.controller;
 import com.javatechie.jwt.api.entity.AuthRequest;
 import com.javatechie.jwt.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class WelcomeController {
@@ -24,13 +32,28 @@ public class WelcomeController {
     }
 
     @PostMapping("/authenticate")
-    public String generateToken(@RequestBody AuthRequest authRequest) throws Exception {
+    public String generateToken(@RequestBody AuthRequest authRequest) {
+        return authenticateAndGenerateToken(authRequest);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody AuthRequest authRequest) {
+        String token = authenticateAndGenerateToken(authRequest);
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("token", token);
+        responseBody.put("userName", authRequest.getUserName());
+        return ResponseEntity.ok(responseBody);
+    }
+
+    private String authenticateAndGenerateToken(AuthRequest authRequest) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
             );
-        } catch (Exception ex) {
-            throw new Exception("inavalid username/password");
+        } catch (BadCredentialsException ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password", ex);
+        } catch (AuthenticationException ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Authentication failed", ex);
         }
         return jwtUtil.generateToken(authRequest.getUserName());
     }
