@@ -1,7 +1,10 @@
 package com.javatechie.jwt.api.controller;
 
 import com.javatechie.jwt.api.entity.AuthRequest;
+import com.javatechie.jwt.api.entity.User;
+import com.javatechie.jwt.api.repository.UserRepository;
 import com.javatechie.jwt.api.util.JwtUtil;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,12 +18,21 @@ public class WelcomeController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/")
     public String welcome() {
         return "Welcome to javatechie !!";
+    }
+
+    @GetMapping("/users")
+    public List<User> users() {
+        return userRepository.findAll();
     }
 
     @PostMapping("/authenticate")
