@@ -1,11 +1,15 @@
 package com.javatechie.jwt.api.controller;
 
 import com.javatechie.jwt.api.entity.AuthRequest;
+import com.javatechie.jwt.api.entity.User;
+import com.javatechie.jwt.api.repository.UserRepository;
 import com.javatechie.jwt.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +21,8 @@ public class WelcomeController {
     private JwtUtil jwtUtil;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/")
     public String welcome() {
@@ -33,5 +39,14 @@ public class WelcomeController {
             throw new Exception("inavalid username/password");
         }
         return jwtUtil.generateToken(authRequest.getUserName());
+    }
+
+    @GetMapping("/users/{userName}")
+    public ResponseEntity<User> getUserByUserName(@PathVariable String userName) {
+        User user = userRepository.findByUserName(userName);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(user);
     }
 }
