@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
 @RestController
 public class WelcomeController {
 
@@ -21,6 +23,11 @@ public class WelcomeController {
     @GetMapping("/")
     public String welcome() {
         return "Welcome to javatechie !!";
+    }
+
+    @GetMapping("/security")
+    public String security(Principal principal) {
+        return "Hello " + principal.getName() + ", you have reached the secured endpoint.";
     }
 
     @PostMapping("/authenticate")
