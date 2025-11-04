@@ -3,12 +3,16 @@ package com.javatechie.jwt.api.controller;
 import com.javatechie.jwt.api.entity.AuthRequest;
 import com.javatechie.jwt.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 public class WelcomeController {
@@ -25,6 +29,17 @@ public class WelcomeController {
 
     @PostMapping("/authenticate")
     public String generateToken(@RequestBody AuthRequest authRequest) throws Exception {
+        authenticate(authRequest);
+        return jwtUtil.generateToken(authRequest.getUserName());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody AuthRequest authRequest) throws Exception {
+        authenticate(authRequest);
+        return ResponseEntity.ok(Collections.singletonMap("token", jwtUtil.generateToken(authRequest.getUserName())));
+    }
+
+    private void authenticate(AuthRequest authRequest) throws Exception {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
@@ -32,6 +47,5 @@ public class WelcomeController {
         } catch (Exception ex) {
             throw new Exception("inavalid username/password");
         }
-        return jwtUtil.generateToken(authRequest.getUserName());
     }
 }
