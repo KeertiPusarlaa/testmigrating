@@ -5,6 +5,7 @@ import com.javatechie.jwt.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,11 +26,20 @@ public class WelcomeController {
 
     @PostMapping("/authenticate")
     public String generateToken(@RequestBody AuthRequest authRequest) throws Exception {
+        return authenticateAndGenerateToken(authRequest);
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody AuthRequest authRequest) throws Exception {
+        return authenticateAndGenerateToken(authRequest);
+    }
+
+    private String authenticateAndGenerateToken(AuthRequest authRequest) throws Exception {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
             );
-        } catch (Exception ex) {
+        } catch (AuthenticationException ex) {
             throw new Exception("inavalid username/password");
         }
         return jwtUtil.generateToken(authRequest.getUserName());
