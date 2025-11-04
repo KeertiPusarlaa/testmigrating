@@ -3,12 +3,19 @@ package com.javatechie.jwt.api.controller;
 import com.javatechie.jwt.api.entity.AuthRequest;
 import com.javatechie.jwt.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class WelcomeController {
@@ -33,5 +40,19 @@ public class WelcomeController {
             throw new Exception("inavalid username/password");
         }
         return jwtUtil.generateToken(authRequest.getUserName());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody AuthRequest authRequest) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
+            );
+        } catch (BadCredentialsException ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid username/password");
+        }
+        Map<String, String> response = new HashMap<>();
+        response.put("token", jwtUtil.generateToken(authRequest.getUserName()));
+        return ResponseEntity.ok(response);
     }
 }
